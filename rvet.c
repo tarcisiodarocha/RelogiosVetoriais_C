@@ -1,5 +1,9 @@
 /**
  * Código base (incompleto) para implementação de relógios vetoriais.
+ * Meta: implementar a interação entre três processos ilustrada na figura
+ * da URL: 
+ * 
+ * https://people.cs.rutgers.edu/~pxk/417/notes/images/clocks-vector.png
  * 
  * Compilação: mpicc -o rvet rvet.c
  * Execução:   mpiexec -n 3 ./rvet
