@@ -19,44 +19,99 @@ typedef struct Clock {
 } Clock;
 
 
+void printClock(Clock *clock, int processo) {
+   printf("Process: %d, Clock: (%d, %d, %d)\n", processo, clock->p[0], clock->p[1], clock->p[2]);
+}
+
 void Event(int pid, Clock *clock){
    clock->p[pid]++;   
 }
 
 
-void Send(int pid, Clock *clock){
+void Send(int origem, int destino, Clock *clock){
    // TO DO
+   int pid_enviado = clock->p[origem];
+   MPI_Send(&pid_enviado, 1, MPI_INT, destino, origem, MPI_COMM_WORLD);
 }
 
-void Receive(int pid, Clock *clock){
-   // TO DO
 
+
+
+void Receive(int origem, Clock *clock){
+   // TO DO
+   int pid_recebido;
+   MPI_Recv(&pid_recebido, 1,  MPI_INT, origem, origem, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+   Event(pid_recebido, clock);
 }
+
+
 
 // Representa o processo de rank 0
 void process0(){
    Clock clock = {{0,0,0}};
+   
    Event(0, &clock);
-   printf("Process: %d, Clock: (%d, %d, %d)\n", 0, clock.p[0], clock.p[1], clock.p[2]);
-
-   // TO DO
-
+   printClock(&clock, 0);
+   
+   Event(0, &clock);
+   Send(0, 1, &clock);
+   printClock(&clock, 0);
+   
+   Event(0, &clock);
+   Receive(1, &clock);
+   printClock(&clock, 0);
+   
+   Event(0, &clock);
+   Send(0, 2, &clock);
+   printClock(&clock, 0);
+   
+   Event(0, &clock);
+   Receive(2, &clock);
+   printClock(&clock, 0);
+   
+   Event(0, &clock);
+   Send(0, 1, &clock);
+   printClock(&clock, 0);
+   
+   Event(0, &clock);
+   printClock(&clock, 0);
+   
 }
 
 // Representa o processo de rank 1
 void process1(){
    Clock clock = {{0,0,0}};
-   printf("Process: %d, Clock: (%d, %d, %d)\n", 1, clock.p[0], clock.p[1], clock.p[2]);
 
-   // TO DO
+   Event(1, &clock);
+   Send(1, 0, &clock);
+   printClock(&clock, 1);
+
+   Event(1, &clock);
+   Receive(0, &clock);
+   printClock(&clock, 1);
+   
+   Event(1, &clock);
+   Receive(0, &clock);
+   printClock(&clock, 1);
+   
+   
+
 }
 
 // Representa o processo de rank 2
 void process2(){
    Clock clock = {{0,0,0}};
-   printf("Process: %d, Clock: (%d, %d, %d)\n", 2, clock.p[0], clock.p[1], clock.p[2]);
+
+   Event(2, &clock);
+   printClock(&clock, 2);
    
-   // TO DO
+   Event(2, &clock);
+   Send(2, 0, &clock);
+   printClock(&clock, 2);
+   
+   Event(2, &clock);
+   Receive(0, &clock);
+   printClock(&clock, 2);   
 }
 
 int main(void) {
