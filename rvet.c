@@ -1,8 +1,8 @@
 /**
  * Template base para implementação de Relógios Vetoriais (MPI)
  * -------------------------------------------------------------
- * Cada processo obtém seu rank internamente (sem passar por parâmetro).
- * Ideal para alunos implementarem passo a passo.
+ * Implementar, tomando como base a sequência de operações da figura
+ * do link: https://drive.google.com/file/d/1IOAJPpJWUoRC0kygZKr6ERe0hpIICRTP/view?usp=sharing
  *
  * Compilação: mpicc -o rvet rvet.c
  * Execução:   mpiexec -n 3 ./rvet
@@ -12,10 +12,21 @@
 #include <string.h>
 #include <mpi.h>
 
-/* Estrutura básica do relógio vetorial. */
+/* Estrutura do relógio vetorial (3 processos). */
 typedef struct Clock {
     int p[3];
 } Clock;
+
+/*
+ * Imprime o estado atual do relógio vetorial.
+ * Mostra: qual processo realizou a atualização e o vetor resultante.
+ */
+void PrintClock(const char *acao, Clock *clock) {
+    int pid;
+    MPI_Comm_rank(MPI_COMM_WORLD, &pid);
+    printf("[Atualizado por P%d] %s -> Clock = (%d,%d,%d)\n",
+           pid, acao, clock->p[0], clock->p[1], clock->p[2]);
+}
 
 /*
  * Evento interno (sem comunicação).
@@ -25,56 +36,66 @@ void Event(Clock *clock) {
     int pid;
     MPI_Comm_rank(MPI_COMM_WORLD, &pid);
     clock->p[pid]++;
+    
+    // No final, imprime relógio atualizado
+    PrintClock("Evento interno", clock);
 }
 
 /*
  * Envio de mensagem.
  * Deve:
- *   1. Obter o rank do processo.
- *   2. Incrementar o contador local (evento de envio).
- *   3. Enviar o vetor de relógio via MPI.
+ *   1. Obter o rank.
+ *   2. Incrementar clock local (evento de envio).
+ *   3. Enviar clock->p via MPI_Send.
  */
-void Send(Clock *clock /*, int dest */) {
+void Send(int dest, Clock *clock) {
     int pid;
     MPI_Comm_rank(MPI_COMM_WORLD, &pid);
     // TODO: incrementar clock local e enviar clock->p via MPI_Send
+    
+    // No final, imprime relógio atualizado:
+    PrintClock("Envio de mensagem", clock);
 }
 
 /*
  * Recebimento de mensagem.
  * Deve:
- *   1. Obter o rank do processo.
- *   2. Receber o vetor remoto via MPI_Recv.
- *   3. Incrementar o contador local (evento de recebimento).
- *   4. Fazer fusão (max elemento a elemento) com o vetor recebido.
+ *   1. Obter o rank.
+ *   2. Receber vetor remoto via MPI_Recv.
+ *   3. Incrementar clock local (evento de recebimento).
+ *   4. Fazer fusão (max elemento a elemento) com vetor recebido.
  */
-void Receive(Clock *clock /*, int src */) {
+void Receive(int src, Clock *clock) {
     int pid;
     MPI_Comm_rank(MPI_COMM_WORLD, &pid);
     // TODO: receber vetor e atualizar clock local
+    
+    // No final, imprime relógio atualizado
+    PrintClock("Recebimento de mensagem", clock);
 }
 
 /*
- * Cada processo executa sua sequência conforme o diagrama da figura.
- * Use Event(), Send() e Receive() para construir a lógica.
+ * Cada processo define sua sequência de eventos e comunicações
+ * conforme o diagrama da figura de referência.
  */
 
 void process0() {
     Clock clock = {{0,0,0}};
+    PrintClock("Estado inicial", &clock);
+
     Event(&clock);
-    printf("Process 0, Clock: (%d,%d,%d)\n", clock.p[0], clock.p[1], clock.p[2]);
-    // TODO: enviar e receber conforme figura
+    // TODO: Send/Receive conforme diagrama
 }
 
 void process1() {
     Clock clock = {{0,0,0}};
-    printf("Process 1, Clock: (%d,%d,%d)\n", clock.p[0], clock.p[1], clock.p[2]);
+    PrintClock("Estado inicial", &clock);
     // TODO
 }
 
 void process2() {
     Clock clock = {{0,0,0}};
-    printf("Process 2, Clock: (%d,%d,%d)\n", clock.p[0], clock.p[1], clock.p[2]);
+    PrintClock("Estado inicial", &clock);
     // TODO
 }
 
