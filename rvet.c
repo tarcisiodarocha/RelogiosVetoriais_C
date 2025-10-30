@@ -3,7 +3,7 @@
  * -------------------------------------------------------------
  * Objetivo: servir como ponto de partida para alunos implementarem a lógica
  * ilustrada na figura:
- * https://people.cs.rutgers.edu/~pxk/417/notes/images/clocks-vector.png
+ * https://cdn.hashnode.com/res/hashnode/image/upload/v1658379705552/hluM8XUvH.png
  *
  * Compilação: mpicc -o rvet rvet.c
  * Execução:   mpiexec -n 3 ./rvet
